@@ -7,18 +7,17 @@ Email: jh-zhang21@mails.tsinghua.edu.cn
 import os
 import cv2
 import time
-import psutil
-p = psutil.Process()
-print(p.cpu_affinity())
+# import psutil
+# p = psutil.Process()
+# print(p.cpu_affinity())
 import logging
 import argparse
-import multiprocessing
 import numpy as np
 # np.set_printoptions(threshold=1000000)
 from io import BytesIO
 import utils
 import estimation
-from prediction import border_prediction, inside_prediction, decompress
+from prediction import border_prediction, inside_prediction
 
 
 image_suffix = [".png", ".jpg", ".jpeg"]
@@ -29,6 +28,10 @@ def logging_result(value):
 
 
 def org_png(image, path=None, grayscale=False):
+    """
+    Compress original image in lossless png format.
+    :return: the original image.
+    """
     if grayscale:
         image = image.astype(np.uint8)
     else:
@@ -40,6 +43,10 @@ def org_png(image, path=None, grayscale=False):
 
 
 def std_jpg(image, path=None, grayscale=False):
+    """
+    Compress original image in standard lossy jpg format.
+    :return: the decompressed image.
+    """
     # image_rec = utils.jpeg(image, Qs)
     image_rec = image
     if grayscale:
@@ -58,6 +65,13 @@ def std_jpg(image, path=None, grayscale=False):
 
 
 def ehc_jpg(image, path=None, grayscale=False):
+    """
+    Compress original image in standard lossy jpg format 
+    with discarding all DC of image block except four 
+    corners image block.
+    :return: the image that discarding all DC of image block 
+    except four corners image block.
+    """
     image = image.astype(np.float64)
     h_n, w_n = image.shape[0] // 8, image.shape[1] // 8
     for i in range(h_n):
@@ -71,6 +85,13 @@ def ehc_jpg(image, path=None, grayscale=False):
 
 
 def rec_jpg(image, path=None, grayscale=False):
+    """
+    Compress original image in standard lossy jpg format 
+    with discarding all DC of image block except four 
+    corners image block. But recover image with DC 
+    prediction.
+    :return: the recovered image, time for DC prediction.
+    """
     image, _, inf_time = dc_recovery(image)
     image = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_YUV2BGR)
     if args.output and path:
@@ -79,6 +100,14 @@ def rec_jpg(image, path=None, grayscale=False):
 
 
 def rec_ehc_jpg(image, rec_path=None, ehc_path=None, grayscale=False):
+    """
+    Compress original image in standard lossy jpg format 
+    with discarding all DC of image block except four 
+    corners image block. But recover image with DC 
+    prediction. (Combination of function `ehc_jpg` and `rec_jpg`)
+    :return: the recovered image, the image that discarding all DC of image 
+    block except four corners image block, time for DC prediction.
+    """
     rec_image, ehc_image, inf_time = dc_recovery(image)
     if grayscale:
         ehc_image = ehc_image.astype(np.uint8)
@@ -96,7 +125,7 @@ def rec_ehc_jpg(image, rec_path=None, ehc_path=None, grayscale=False):
 
 def write_image(image, org_pth=None, std_pth=None, ehc_pth=None, rec_pth=None, grayscale=False):
     """
-    Convert image from BGR to YUV and save it.
+    Convert image from BGR to YUV and save it in different format.
     :param image: ndarray, YUV image
     :param image_path: string, path of image file
     """
@@ -169,7 +198,7 @@ def idct_transform(dct_coefs, mode='compress'):
 
 def dc_recovery(image):
     """
-    Recover image from four corners.
+    Recover image from four corners with DC prediction.
     :param: image: ndarray, original image
     :return: dct_preds: ndarray, predicted DCT coefficients of blocks
              image_rec: ndarray, recovered image
@@ -204,7 +233,7 @@ def dc_recovery(image):
 
 
 def get_args():
-    argparser = argparse.ArgumentParser("DC recovery")
+    argparser = argparse.ArgumentParser("python ndcjpeg.py")
     argparser.add_argument('--log_path', type=str, default='./log/DCRecovery', help="Path to save log.")
     argparser.add_argument('--dataset_path', type=str, default='../DataSets/LFW', help="Image dataset path.")
     argparser.add_argument('--org_imgs_path', type=str, default='./dataset/LFW_org', help="Input image path.")
@@ -266,17 +295,10 @@ def main(args):
                 std_size = os.path.getsize(std_path) / org_size
                 ehc_size = os.path.getsize(ehc_path) / org_size
                 rec_size = os.path.getsize(rec_path) / org_size
-                # std_psnr, std_ssim = peak_signal_noise_ratio(std_image, image, data_range=255), structural_similarity(std_image, image, data_range=255, multichannel=True)
-                # ehc_psnr, ehc_ssim = peak_signal_noise_ratio(ehc_image, image, data_range=255), structural_similarity(ehc_image, image, data_range=255, multichannel=True)
-                # rec_psnr, rec_ssim = peak_signal_noise_ratio(rec_image, image, data_range=255), structural_similarity(rec_image, image, data_range=255, multichannel=True)
                 std_psnr, std_ssim = utils.calculate_psnr(std_image, org_image), utils.calculate_ssim(std_image, org_image)
                 ehc_psnr, ehc_ssim = utils.calculate_psnr(ehc_image, org_image), utils.calculate_ssim(ehc_image, org_image)
                 rec_psnr, rec_ssim = utils.calculate_psnr(rec_image, org_image), utils.calculate_ssim(rec_image, org_image)
                 std_rec_psnr, std_rec_ssim = utils.calculate_psnr(std_image, rec_image), utils.calculate_ssim(std_image, rec_image)
-                # std_psnr, std_ssim = tf.image.psnr(std_image, org_image, max_val=255).numpy().item(), tf.image.ssim(std_image, org_image, max_val=255).numpy().item()
-                # ehc_psnr, ehc_ssim = tf.image.psnr(ehc_image, org_image, max_val=255).numpy().item(), tf.image.ssim(ehc_image, org_image, max_val=255).numpy().item()
-                # rec_psnr, rec_ssim = tf.image.psnr(rec_image, org_image, max_val=255).numpy().item(), tf.image.ssim(rec_image, org_image, max_val=255).numpy().item()
-                # std_rec_psnr, std_rec_ssim = tf.image.psnr(std_image, rec_image, max_val=255).numpy().item(), tf.image.ssim(std_image, rec_image, max_val=255).numpy().item()
                 logger.info(" #### PSNR -> std: {:.4f}, ehc: {:.4f}, rec: {:.4f}, std-rec: {:.4f}".format(std_psnr, ehc_psnr, rec_psnr, std_rec_psnr))
                 logger.info("      SSIM -> std: {:.4f}, ehc: {:.4f}, rec: {:.4f}, std-rec: {:.4f}".format(std_ssim, ehc_ssim, rec_ssim, std_rec_ssim))
                 logger.info("      Size -> std: {:.4f}, ehc: {:.4f}, rec: {:.4f}".format(std_size, ehc_size, rec_size))
