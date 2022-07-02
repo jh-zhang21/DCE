@@ -39,8 +39,10 @@ Firstly, download some open image datasets.
 Then, refer to `run.sh`, run `python ndcjpeg.py` with proper parameter setting.
 
 ```bash
-usage: python ndcjpeg.py [-h] [--log_path LOG_PATH] [--dataset_path DATASET_PATH] [--org_imgs_path ORG_IMGS_PATH] [--std_imgs_path STD_IMGS_PATH] [--ehc_imgs_path EHC_IMGS_PATH] [--rec_imgs_path REC_IMGS_PATH] [--weight WEIGHT]
-                   [--height HEIGHT] [--quality QUALITY] [--estimate ESTIMATE] [--resize] [--grayscale] [--output]
+usage: python ndcjpeg.py [-h] [--log_path LOG_PATH] [--dataset_path DATASET_PATH] [--org_imgs_path ORG_IMGS_PATH]
+                         [--std_imgs_path STD_IMGS_PATH] [--ehc_imgs_path EHC_IMGS_PATH]
+                         [--rec_imgs_path REC_IMGS_PATH] [--weight WEIGHT] [--height HEIGHT] [--quality QUALITY]
+                         [--estimate ESTIMATE] [--resize] [--grayscale] [--output]
 
 options:
   -h, --help            show this help message and exit
