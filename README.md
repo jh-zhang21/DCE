@@ -2,11 +2,17 @@
 
 [Jianghui Zhang](https://orcid.org/my-orcid?orcid=0000-0002-3523-5200)
 
+## [[Paper]](https://ieeexplore.ieee.org/document/9897366) [[Citation]](#citation) [[Poster]](#poster)
+
 ## Overview
 
 This is the official implementations of DCE in python simulation. DCE estimate DC of one image block with the help of the adjacent image blocks, while decoupling the prediction direction of the boundary pixels, which make the better image recovery. Meanwhile, DCE predict the optimal DC estimation via convex relaxation with negligible time cost, which make DC estimation feasible in real-time scene.
 
 ![Architecture](./figs/Architecture.png)
+
+## Poster
+
+## [Download Poster PDF](https://github.com/jh-zhang21/DCE/blob/master/Poster.pdf)
 
 ## Getting Started
 
@@ -66,3 +72,17 @@ options:
   --output              Whether output image or not.
 ```
 
+## Citation
+
+If you use the work released here for your research, please cite this paper:
+
+```
+@inproceedings{zhang2022improved,
+  title={Improved DC Estimation for JPEG Compression Via Convex Relaxation},
+  author={Zhang, Jianghui and Chen, Bin and Huang, Yujun and Qiu, Han and Wang, Zhi and Xia, Shutao},
+  booktitle={2022 IEEE International Conference on Image Processing (ICIP)},
+  pages={2461--2465},
+  year={2022},
+  organization={IEEE}
+}
+```
