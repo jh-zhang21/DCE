@@ -12,7 +12,7 @@ This is the official implementations of DCE in python simulation. DCE estimate D
 
 ## Poster
 
-## [Download Poster PDF](https://github.com/jh-zhang21/DCE/blob/master/Poster.pdf)
+## [Download Poster PDF](https://github.com/jh-zhang21/DCE/blob/master/poster.pdf)
 
 ## Getting Started
 
